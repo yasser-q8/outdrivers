@@ -520,7 +520,7 @@
         }
         
         .comparison-table .month-header {
-            background: linear-gradient(135deg, #FF0000 0%, #3949ab 100%);
+            background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%);
             color: white;
             font-weight: bold;
         }
@@ -533,6 +533,97 @@
         .comparison-table .manager-total {
             background: #e8eaf6;
             font-weight: bold;
+        }
+        
+        .restaurant-comparison-table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .restaurant-comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        .restaurant-comparison-table th {
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #ddd;
+        }
+        
+        .restaurant-comparison-table td {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .restaurant-comparison-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .restaurant-comparison-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .restaurant-comparison-table .restaurant-name {
+            font-weight: bold;
+            background: #f0f0f0;
+            text-align: right;
+            padding-right: 20px;
+        }
+        
+        .restaurant-comparison-table .month-column {
+            background: #e3f2fd;
+            font-weight: bold;
+        }
+        
+        .restaurant-comparison-table .car-salary {
+            background: #fff3e0;
+            font-weight: bold;
+        }
+        
+        .restaurant-comparison-table .bike-salary {
+            background: #e8f5e9;
+            font-weight: bold;
+        }
+        
+        .restaurant-comparison-table .restaurant-total {
+            background: #f3e5f5;
+            font-weight: bold;
+        }
+        
+        .restaurant-comparison-table .grand-total {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .manager-selector {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .manager-select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .manager-select:focus {
+            outline: none;
+            border-color: #d32f2f;
         }
         
         @media (max-width: 768px) {
@@ -568,6 +659,10 @@
             .tab {
                 padding: 12px;
                 font-size: 14px;
+            }
+            
+            .comparison-table, .restaurant-comparison-table {
+                min-width: 100%;
             }
         }
     </style>
@@ -659,7 +754,7 @@
         <div id="controls" style="display: none;">
             <!-- تحسين عناوين التنقل -->
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('report')" style="background: linear-gradient(135deg, #FF0000 0%, #3949ab 100%); color: white; border-bottom: 3px solid #3949ab;">
+                <div class="tab active" onclick="switchTab('report')" style="background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white; border-bottom: 3px solid #3949ab;">
                     📋 تقرير موجز
                 </div>
                 <div class="tab" onclick="switchTab('detailed')" style="background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%); color: white; border-bottom: 3px solid #1976d2;">
@@ -727,8 +822,16 @@
                     <div style="text-align: center; margin-top: 20px;">
                         <button class="search-btn" onclick="compareSelectedMonths()">مقارنة الأشهر المحددة</button>
                         <button class="search-btn" onclick="compareAllMonths()" style="background: #ff9800;">مقارنة السنة كاملة</button>
-                        <button class="search-btn" onclick="downloadComparisonPDF()" style="background: #d32f2f;">📄 تصدير مقارنة PDF</button>
-                        <button class="search-btn" onclick="generateComparisonTable()" style="background: #9c27b0;">📊 جدول المقارنة</button>
+                        <button class="search-btn" onclick="generateComparisonTable()" style="background: #9c27b0;">📊 جدول مقارنة الرواتب</button>
+                        <button class="search-btn" onclick="downloadComparisonTablePDF()" style="background: #d32f2f;">📄 تصدير جدول PDF</button>
+                    </div>
+                    
+                    <div id="managerSelector" class="manager-selector" style="display: none;">
+                        <select class="manager-select" id="managerSelect" onchange="generateRestaurantComparisonTable()">
+                            <option value="">اختر مدير التشغيل</option>
+                        </select>
+                        <button class="search-btn" onclick="generateRestaurantComparisonTable()" style="margin-right: 10px; background: #5c6bc0;">📊 جدول مقارنة المطاعم</button>
+                        <button class="search-btn" onclick="downloadRestaurantComparisonPDF()" style="background: #388e3c;">📄 تصدير جدول المطاعم PDF</button>
                     </div>
                 </div>
                 
@@ -737,59 +840,59 @@
         </div>
     </div>
 
-    <!-- نموذج PDF مخفي -->
-    <div id="pdf-template" style="position: fixed; left: -10000px; top: -10000px; width: 794px; height: auto; min-height: 1123px; background: white; padding: 10px; box-sizing: border-box; z-index: -1000; font-size: 12px; font-family: 'Times New Roman', serif;">
-        <div class="pdf-header" style="padding: 5px; margin-bottom: 10px; padding-left: 30px;">
+    <!-- نموذج PDF ملون للتقرير المفصل -->
+    <div id="pdf-detailed-template" style="position: fixed; left: -10000px; top: -10000px; width: 794px; height: auto; min-height: 1123px; background: white; padding: 10px; box-sizing: border-box; z-index: -1000; font-size: 12px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl;">
+        <div class="pdf-header" style="padding: 5px; margin-bottom: 10px; padding-right: 30px;">
             <div class="pdf-header-row" style="text-align: center;">
                 <div style="text-align: center; margin-bottom: 10px;">
                     <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شعار الشركة" 
                          style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #4a90e2; margin-bottom: 5px; margin: 0 auto 5px; display: block;">
-                    <h2 style="color: #4a90e2; margin: 0; font-size: 18px;" id="pdf-company-name">
+                    <h2 style="color: #4a90e2; margin: 0; font-size: 18px;" id="pdf-detailed-company-name">
                         شركة نايف للأغذية
                     </h2>
                 </div>
-                <h3 style="color: #4a90e2; margin: 0 0 8px 0; font-size: 16px;" id="pdf-report-title">كشف حساب موزعين</h3>
+                <h3 style="color: #4a90e2; margin: 0 0 8px 0; font-size: 16px;" id="pdf-detailed-report-title">كشف حساب موزعين - تقرير مفصل</h3>
                 <div style="margin-bottom: 8px; text-align: center;">
                     <div style="font-size: 14px; font-weight: bold; display: inline-block;">
-                        التقرير: <span id="pdf-report-type"></span>
+                        التقرير: <span id="pdf-detailed-report-type"></span>
                     </div>
                     <div style="display: inline-block; width: 1cm;"></div>
                     <div style="font-size: 12px; display: inline-block;">
-                        الفترة: <span id="pdf-period"></span>
+                        الفترة: <span id="pdf-detailed-period"></span>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px;">
-                    <div>عدد السجلات: <span id="pdf-total-records"></span></div>
-                    <div>تاريخ الطباعة: <span id="pdf-print-date"></span></div>
+                    <div>عدد السجلات: <span id="pdf-detailed-total-records"></span></div>
+                    <div>تاريخ الطباعة: <span id="pdf-detailed-print-date"></span></div>
                 </div>
             </div>
         </div>
         
-        <div id="pdf-summary" style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 11px; padding-left: 30px;">
+        <div id="pdf-detailed-summary" style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 11px; padding-right: 30px;">
         </div>
         
-        <table class="statement-table" id="pdf-statement-table" style="font-size: 10px; border-collapse: collapse; width: calc(100% - 40px); margin-left: 30px;">
+        <table class="detailed-statement-table" id="pdf-detailed-statement-table" style="font-size: 10px; border-collapse: collapse; width: calc(100% - 40px); margin-right: 30px;">
             <thead>
                 <tr>
-                    <th width="5%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">م</th>
-                    <th width="15%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">اسم الموزع</th>
-                    <th width="15%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">المطعم</th>
-                    <th width="8%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">أيام الدوام</th>
-                    <th width="8%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">عدد الساعات</th>
-                    <th width="12%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">الراتب</th>
-                    <th width="18%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">الشركة الخارجية</th>
-                    <th width="10%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">نوع المركبة</th>
-                    <th width="9%" style="padding: 4px; border: 1px solid #000; text-align: center; background: #4a90e2; color: white;">الشهر</th>
+                    <th width="5%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">م</th>
+                    <th width="15%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">اسم الموزع</th>
+                    <th width="15%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">المطعم</th>
+                    <th width="8%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">أيام الدوام</th>
+                    <th width="8%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">عدد الساعات</th>
+                    <th width="12%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">الراتب</th>
+                    <th width="18%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">الشركة الخارجية</th>
+                    <th width="10%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">نوع المركبة</th>
+                    <th width="9%" style="padding: 4px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white;">الشهر</th>
                 </tr>
             </thead>
-            <tbody id="pdf-table-body" style="font-size: 9px;">
+            <tbody id="pdf-detailed-table-body" style="font-size: 9px;">
             </tbody>
         </table>
         
-        <div id="pdf-totals" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 11px; font-weight: bold; padding-left: 30px;">
+        <div id="pdf-detailed-totals" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 11px; font-weight: bold; padding-right: 30px;">
         </div>
         
-        <div id="pdf-signature" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left; font-size: 8px; color: #d32f2f;">
+        <div id="pdf-detailed-signature" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left; font-size: 8px; color: #d32f2f;">
             Yasser Elkhateeb - مطور البرنامج 67011143
         </div>
     </div>
@@ -938,6 +1041,8 @@
         const reportContainer = document.getElementById('reportContainer');
         const detailedReportContainer = document.getElementById('detailedReportContainer');
         const statsDiv = document.getElementById('stats');
+        const managerSelector = document.getElementById('managerSelector');
+        const managerSelect = document.getElementById('managerSelect');
 
         // البحث الديناميكي
         let searchTimeout;
@@ -1626,7 +1731,7 @@
             
             const comparisonResult = document.getElementById('comparisonResult');
             
-            // تجميع البيانات حسب مدير التشغيل لكل شهر
+            // تجميع البيانات حسب مدير التشغيل لكل شهر (بالرواتب)
             const managerStats = {};
             const allManagers = new Set();
             
@@ -1634,35 +1739,38 @@
                 const data = monthlyData[month] || [];
                 managerStats[month] = {};
                 
-                // تجميع البيانات حسب مدير التشغيل
+                // تجميع البيانات حسب مدير التشغيل (بالرواتب)
                 data.forEach(item => {
                     const manager = item.مدير_التشغيل || 'غير معروف';
                     allManagers.add(manager);
                     
                     if (!managerStats[month][manager]) {
                         managerStats[month][manager] = {
-                            cars: 0,
-                            bikes: 0,
-                            total: 0,
-                            salary: 0
+                            carSalary: 0,
+                            bikeSalary: 0,
+                            totalSalary: 0,
+                            employees: 0
                         };
                     }
                     
                     if (item.نوع_المركبة === 'سيارة') {
-                        managerStats[month][manager].cars++;
+                        managerStats[month][manager].carSalary += item.راتب || 0;
                     } else if (item.نوع_المركبة === 'سيكل') {
-                        managerStats[month][manager].bikes++;
+                        managerStats[month][manager].bikeSalary += item.راتب || 0;
                     }
                     
-                    managerStats[month][manager].total++;
-                    managerStats[month][manager].salary += item.راتب || 0;
+                    managerStats[month][manager].totalSalary += item.راتب || 0;
+                    managerStats[month][manager].employees++;
                 });
             });
             
-            // إنشاء جدول المقارنة
+            // تحديث اختيار المديرين
+            updateManagerSelector(Array.from(allManagers).filter(m => m && m !== 'غير معروف'));
+            
+            // إنشاء جدول المقارنة (بالرواتب)
             let html = `
                 <div style="margin-top: 30px;">
-                    <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">📊 جدول مقارنة الأشهر بالإجماليات</h3>
+                    <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">📊 جدول مقارنة الرواتب للأشهر</h3>
                     <div class="comparison-table-container">
                         <table class="comparison-table">
                             <thead>
@@ -1671,25 +1779,26 @@
                                     <th colspan="3" class="month-header">طارق بيومي</th>
                                     <th colspan="3" class="month-header">هاني عبدالله</th>
                                     <th colspan="3" class="month-header">محمد مرتضى</th>
-                                    <th colspan="3" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">الإجمالي</th>
+                                    <th colspan="4" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">الإجمالي للشهر</th>
                                 </tr>
                                 <tr>
                                     <!-- أعمدة طارق بيومي -->
-                                    <th>سيارات</th>
-                                    <th>سيكل</th>
-                                    <th>إجمالي</th>
+                                    <th>رواتب سيارات</th>
+                                    <th>رواتب سيكل</th>
+                                    <th>إجمالي الرواتب</th>
                                     <!-- أعمدة هاني عبدالله -->
-                                    <th>سيارات</th>
-                                    <th>سيكل</th>
-                                    <th>إجمالي</th>
+                                    <th>رواتب سيارات</th>
+                                    <th>رواتب سيكل</th>
+                                    <th>إجمالي الرواتب</th>
                                     <!-- أعمدة محمد مرتضى -->
-                                    <th>سيارات</th>
-                                    <th>سيكل</th>
-                                    <th>إجمالي</th>
+                                    <th>رواتب سيارات</th>
+                                    <th>رواتب سيكل</th>
+                                    <th>إجمالي الرواتب</th>
                                     <!-- أعمدة الإجمالي -->
-                                    <th>سيارات</th>
-                                    <th>سيكل</th>
-                                    <th>الإجمالي</th>
+                                    <th>إجمالي سيارات</th>
+                                    <th>إجمالي سيكل</th>
+                                    <th>إجمالي الرواتب</th>
+                                    <th>عدد الموزعين</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1698,86 +1807,93 @@
             // إضافة بيانات كل شهر
             selectedMonths.forEach(month => {
                 const monthData = monthlyData[month] || [];
-                const tarekStats = managerStats[month]['طارق بيومي'] || { cars: 0, bikes: 0, total: 0, salary: 0 };
-                const haniStats = managerStats[month]['هاني عبدالله'] || { cars: 0, bikes: 0, total: 0, salary: 0 };
-                const murtadaStats = managerStats[month]['محمد مرتضى'] || { cars: 0, bikes: 0, total: 0, salary: 0 };
+                const tarekStats = managerStats[month]['طارق بيومي'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                const haniStats = managerStats[month]['هاني عبدالله'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                const murtadaStats = managerStats[month]['محمد مرتضى'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
                 
-                // حساب الإجماليات
-                const totalCars = tarekStats.cars + haniStats.cars + murtadaStats.cars;
-                const totalBikes = tarekStats.bikes + haniStats.bikes + murtadaStats.bikes;
-                const totalAll = totalCars + totalBikes;
+                // حساب الإجماليات للشهر
+                const totalCarSalary = tarekStats.carSalary + haniStats.carSalary + murtadaStats.carSalary;
+                const totalBikeSalary = tarekStats.bikeSalary + haniStats.bikeSalary + murtadaStats.bikeSalary;
+                const totalAllSalary = totalCarSalary + totalBikeSalary;
+                const totalEmployees = tarekStats.employees + haniStats.employees + murtadaStats.employees;
                 
                 html += `
                     <tr>
                         <td style="font-weight: bold;">${month}</td>
                         <!-- بيانات طارق بيومي -->
-                        <td>${tarekStats.cars}</td>
-                        <td>${tarekStats.bikes}</td>
-                        <td style="font-weight: bold;">${tarekStats.total}</td>
+                        <td>${tarekStats.carSalary.toFixed(3)}</td>
+                        <td>${tarekStats.bikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${tarekStats.totalSalary.toFixed(3)}</td>
                         <!-- بيانات هاني عبدالله -->
-                        <td>${haniStats.cars}</td>
-                        <td>${haniStats.bikes}</td>
-                        <td style="font-weight: bold;">${haniStats.total}</td>
+                        <td>${haniStats.carSalary.toFixed(3)}</td>
+                        <td>${haniStats.bikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${haniStats.totalSalary.toFixed(3)}</td>
                         <!-- بيانات محمد مرتضى -->
-                        <td>${murtadaStats.cars}</td>
-                        <td>${murtadaStats.bikes}</td>
-                        <td style="font-weight: bold;">${murtadaStats.total}</td>
+                        <td>${murtadaStats.carSalary.toFixed(3)}</td>
+                        <td>${murtadaStats.bikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${murtadaStats.totalSalary.toFixed(3)}</td>
                         <!-- الإجماليات -->
-                        <td style="background: #e8f5e9; font-weight: bold;">${totalCars}</td>
-                        <td style="background: #e8f5e9; font-weight: bold;">${totalBikes}</td>
-                        <td style="background: #c8e6c9; font-weight: bold;">${totalAll}</td>
+                        <td style="background: #e8f5e9; font-weight: bold;">${totalCarSalary.toFixed(3)}</td>
+                        <td style="background: #e8f5e9; font-weight: bold;">${totalBikeSalary.toFixed(3)}</td>
+                        <td style="background: #c8e6c9; font-weight: bold;">${totalAllSalary.toFixed(3)}</td>
+                        <td style="background: #e3f2fd; font-weight: bold;">${totalEmployees}</td>
                     </tr>
                 `;
             });
             
             // إضافة صف المجموع
             if (selectedMonths.length > 1) {
-                let totalTarekCars = 0, totalTarekBikes = 0, totalTarek = 0;
-                let totalHaniCars = 0, totalHaniBikes = 0, totalHani = 0;
-                let totalMurtadaCars = 0, totalMurtadaBikes = 0, totalMurtada = 0;
-                let grandTotalCars = 0, grandTotalBikes = 0, grandTotal = 0;
+                let totalTarekCarSalary = 0, totalTarekBikeSalary = 0, totalTarekSalary = 0, totalTarekEmployees = 0;
+                let totalHaniCarSalary = 0, totalHaniBikeSalary = 0, totalHaniSalary = 0, totalHaniEmployees = 0;
+                let totalMurtadaCarSalary = 0, totalMurtadaBikeSalary = 0, totalMurtadaSalary = 0, totalMurtadaEmployees = 0;
+                let grandTotalCarSalary = 0, grandTotalBikeSalary = 0, grandTotalSalary = 0, grandTotalEmployees = 0;
                 
                 selectedMonths.forEach(month => {
-                    const tarekStats = managerStats[month]['طارق بيومي'] || { cars: 0, bikes: 0, total: 0 };
-                    const haniStats = managerStats[month]['هاني عبدالله'] || { cars: 0, bikes: 0, total: 0 };
-                    const murtadaStats = managerStats[month]['محمد مرتضى'] || { cars: 0, bikes: 0, total: 0 };
+                    const tarekStats = managerStats[month]['طارق بيومي'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                    const haniStats = managerStats[month]['هاني عبدالله'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                    const murtadaStats = managerStats[month]['محمد مرتضى'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
                     
-                    totalTarekCars += tarekStats.cars;
-                    totalTarekBikes += tarekStats.bikes;
-                    totalTarek += tarekStats.total;
+                    totalTarekCarSalary += tarekStats.carSalary;
+                    totalTarekBikeSalary += tarekStats.bikeSalary;
+                    totalTarekSalary += tarekStats.totalSalary;
+                    totalTarekEmployees += tarekStats.employees;
                     
-                    totalHaniCars += haniStats.cars;
-                    totalHaniBikes += haniStats.bikes;
-                    totalHani += haniStats.total;
+                    totalHaniCarSalary += haniStats.carSalary;
+                    totalHaniBikeSalary += haniStats.bikeSalary;
+                    totalHaniSalary += haniStats.totalSalary;
+                    totalHaniEmployees += haniStats.employees;
                     
-                    totalMurtadaCars += murtadaStats.cars;
-                    totalMurtadaBikes += murtadaStats.bikes;
-                    totalMurtada += murtadaStats.total;
+                    totalMurtadaCarSalary += murtadaStats.carSalary;
+                    totalMurtadaBikeSalary += murtadaStats.bikeSalary;
+                    totalMurtadaSalary += murtadaStats.totalSalary;
+                    totalMurtadaEmployees += murtadaStats.employees;
                 });
                 
-                grandTotalCars = totalTarekCars + totalHaniCars + totalMurtadaCars;
-                grandTotalBikes = totalTarekBikes + totalHaniBikes + totalMurtadaBikes;
-                grandTotal = totalTarek + totalHani + totalMurtada;
+                grandTotalCarSalary = totalTarekCarSalary + totalHaniCarSalary + totalMurtadaCarSalary;
+                grandTotalBikeSalary = totalTarekBikeSalary + totalHaniBikeSalary + totalMurtadaBikeSalary;
+                grandTotalSalary = totalTarekSalary + totalHaniSalary + totalMurtadaSalary;
+                grandTotalEmployees = totalTarekEmployees + totalHaniEmployees + totalMurtadaEmployees;
                 
                 html += `
                     <tr class="total-row">
                         <td style="font-weight: bold;">المجموع</td>
                         <!-- مجاميع طارق بيومي -->
-                        <td>${totalTarekCars}</td>
-                        <td>${totalTarekBikes}</td>
-                        <td style="font-weight: bold;">${totalTarek}</td>
+                        <td>${totalTarekCarSalary.toFixed(3)}</td>
+                        <td>${totalTarekBikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${totalTarekSalary.toFixed(3)}</td>
                         <!-- مجاميع هاني عبدالله -->
-                        <td>${totalHaniCars}</td>
-                        <td>${totalHaniBikes}</td>
-                        <td style="font-weight: bold;">${totalHani}</td>
+                        <td>${totalHaniCarSalary.toFixed(3)}</td>
+                        <td>${totalHaniBikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${totalHaniSalary.toFixed(3)}</td>
                         <!-- مجاميع محمد مرتضى -->
-                        <td>${totalMurtadaCars}</td>
-                        <td>${totalMurtadaBikes}</td>
-                        <td style="font-weight: bold;">${totalMurtada}</td>
+                        <td>${totalMurtadaCarSalary.toFixed(3)}</td>
+                        <td>${totalMurtadaBikeSalary.toFixed(3)}</td>
+                        <td style="font-weight: bold;">${totalMurtadaSalary.toFixed(3)}</td>
                         <!-- المجاميع الكلية -->
-                        <td style="background: #ffcc80; font-weight: bold;">${grandTotalCars}</td>
-                        <td style="background: #ffcc80; font-weight: bold;">${grandTotalBikes}</td>
-                        <td style="background: #ffb74d; font-weight: bold;">${grandTotal}</td>
+                        <td style="background: #ffcc80; font-weight: bold;">${grandTotalCarSalary.toFixed(3)}</td>
+                        <td style="background: #ffcc80; font-weight: bold;">${grandTotalBikeSalary.toFixed(3)}</td>
+                        <td style="background: #ffb74d; font-weight: bold;">${grandTotalSalary.toFixed(3)}</td>
+                        <td style="background: #bbdefb; font-weight: bold;">${grandTotalEmployees}</td>
                     </tr>
                 `;
             }
@@ -1785,6 +1901,199 @@
             html += `</tbody></table></div></div>`;
             
             comparisonResult.innerHTML = html;
+        }
+
+        function updateManagerSelector(managers) {
+            managerSelect.innerHTML = '<option value="">اختر مدير التشغيل</option>';
+            managers.forEach(manager => {
+                if (manager && manager.trim() !== '') {
+                    managerSelect.innerHTML += `<option value="${manager}">${manager}</option>`;
+                }
+            });
+            managerSelector.style.display = 'block';
+        }
+
+        function generateRestaurantComparisonTable() {
+            const selectedManager = managerSelect.value;
+            if (!selectedManager) {
+                alert('يرجى اختيار مدير التشغيل');
+                return;
+            }
+            
+            const selectedMonths = Array.from(document.querySelectorAll('.compare-month:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedMonths.length === 0) {
+                alert('يرجى اختيار الأشهر للمقارنة أولاً');
+                return;
+            }
+            
+            const comparisonResult = document.getElementById('comparisonResult');
+            
+            // تجميع بيانات المطاعم للشهور المحددة
+            const restaurantStats = {};
+            const allRestaurants = new Set();
+            
+            selectedMonths.forEach(month => {
+                const data = monthlyData[month] || [];
+                restaurantStats[month] = {};
+                
+                // تصفية البيانات حسب مدير التشغيل المحدد
+                const managerData = data.filter(item => item.مدير_التشغيل === selectedManager);
+                
+                // تجميع بيانات المطاعم
+                managerData.forEach(item => {
+                    const restaurant = item.mطعم || 'غير معروف';
+                    allRestaurants.add(restaurant);
+                    
+                    if (!restaurantStats[month][restaurant]) {
+                        restaurantStats[month][restaurant] = {
+                            carSalary: 0,
+                            bikeSalary: 0,
+                            totalSalary: 0,
+                            employees: 0
+                        };
+                    }
+                    
+                    if (item.نوع_المركبة === 'سيارة') {
+                        restaurantStats[month][restaurant].carSalary += item.راتب || 0;
+                    } else if (item.نوع_المركبة === 'سيكل') {
+                        restaurantStats[month][restaurant].bikeSalary += item.راتب || 0;
+                    }
+                    
+                    restaurantStats[month][restaurant].totalSalary += item.راتب || 0;
+                    restaurantStats[month][restaurant].employees++;
+                });
+            });
+            
+            // تحديد الفترة
+            const startMonth = selectedMonths[0];
+            const endMonth = selectedMonths[selectedMonths.length - 1];
+            const periodText = selectedMonths.length === 1 ? `لشهر ${startMonth}` : `من ${startMonth} حتى ${endMonth}`;
+            
+            // إنشاء جدول مقارنة المطاعم
+            let html = `
+                <div style="margin-top: 30px;">
+                    <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">📊 إجمالي رواتب الموزعين الخارجيين لمطاعم الأستاذ/ ${selectedManager} ${periodText}</h3>
+                    <div class="restaurant-comparison-table-container">
+                        <table class="restaurant-comparison-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="restaurant-name">اسم المطعم</th>
+            `;
+            
+            // إضافة أعمدة الأشهر
+            selectedMonths.forEach(month => {
+                html += `<th colspan="2" class="month-column">${month}</th>`;
+            });
+            
+            html += `
+                                    <th colspan="3" style="background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white;">إجمالي السنة</th>
+                                </tr>
+                                <tr>
+            `;
+            
+            // إضافة أعمدة التفاصيل لكل شهر
+            selectedMonths.forEach(() => {
+                html += `
+                    <th class="car-salary">رواتب سيارات</th>
+                    <th class="bike-salary">رواتب سيكل</th>
+                `;
+            });
+            
+            html += `
+                    <th class="car-salary">إجمالي سيارات</th>
+                    <th class="bike-salary">إجمالي سيكل</th>
+                    <th class="restaurant-total">الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody>
+            `;
+            
+            // حساب الإجماليات الشهرية
+            const monthlyTotals = {};
+            selectedMonths.forEach(month => {
+                monthlyTotals[month] = {
+                    carSalary: 0,
+                    bikeSalary: 0,
+                    totalSalary: 0
+                };
+            });
+            
+            // إضافة بيانات المطاعم
+            Array.from(allRestaurants).filter(r => r && r !== 'غير معروف').forEach(restaurant => {
+                html += `<tr><td class="restaurant-name">${restaurant}</td>`;
+                
+                // حساب إجماليات السنة للمطعم
+                let restaurantYearCarSalary = 0;
+                let restaurantYearBikeSalary = 0;
+                let restaurantYearTotalSalary = 0;
+                
+                // إضافة بيانات كل شهر
+                selectedMonths.forEach(month => {
+                    const stats = restaurantStats[month][restaurant] || { carSalary: 0, bikeSalary: 0, totalSalary: 0 };
+                    
+                    html += `
+                        <td class="car-salary">${stats.carSalary.toFixed(3)}</td>
+                        <td class="bike-salary">${stats.bikeSalary.toFixed(3)}</td>
+                    `;
+                    
+                    // تحديث الإجماليات الشهرية
+                    monthlyTotals[month].carSalary += stats.carSalary;
+                    monthlyTotals[month].bikeSalary += stats.bikeSalary;
+                    monthlyTotals[month].totalSalary += stats.totalSalary;
+                    
+                    // تحديث إجماليات السنة للمطعم
+                    restaurantYearCarSalary += stats.carSalary;
+                    restaurantYearBikeSalary += stats.bikeSalary;
+                    restaurantYearTotalSalary += stats.totalSalary;
+                });
+                
+                // إضافة إجماليات السنة للمطعم
+                html += `
+                    <td class="car-salary">${restaurantYearCarSalary.toFixed(3)}</td>
+                    <td class="bike-salary">${restaurantYearBikeSalary.toFixed(3)}</td>
+                    <td class="restaurant-total">${restaurantYearTotalSalary.toFixed(3)}</td>
+                `;
+                
+                html += `</tr>`;
+            });
+            
+            // إضافة صف الإجماليات الشهرية
+            html += `<tr class="grand-total">`;
+            html += `<td class="restaurant-name"><strong>إجمالي الشهر</strong></td>`;
+            
+            selectedMonths.forEach(month => {
+                const totals = monthlyTotals[month];
+                html += `
+                    <td><strong>${totals.carSalary.toFixed(3)}</strong></td>
+                    <td><strong>${totals.bikeSalary.toFixed(3)}</strong></td>
+                `;
+            });
+            
+            // حساب إجماليات السنة الكلية
+            let yearTotalCarSalary = 0;
+            let yearTotalBikeSalary = 0;
+            let yearTotalAllSalary = 0;
+            
+            selectedMonths.forEach(month => {
+                const totals = monthlyTotals[month];
+                yearTotalCarSalary += totals.carSalary;
+                yearTotalBikeSalary += totals.bikeSalary;
+                yearTotalAllSalary += totals.totalSalary;
+            });
+            
+            html += `
+                <td><strong>${yearTotalCarSalary.toFixed(3)}</strong></td>
+                <td><strong>${yearTotalBikeSalary.toFixed(3)}</strong></td>
+                <td><strong>${yearTotalAllSalary.toFixed(3)}</strong></td>
+            `;
+            
+            html += `</tr>`;
+            
+            html += `</tbody></table></div></div>`;
+            
+            comparisonResult.innerHTML += html;
         }
 
         function calculateMonthStats(data) {
@@ -1873,10 +2182,10 @@
         }
 
         async function downloadDetailedPDF() {
-            await generatePDF(true, 'detailed');
+            await generateDetailedPDF();
         }
 
-        async function downloadComparisonPDF() {
+        async function downloadComparisonTablePDF() {
             const selectedMonths = Array.from(document.querySelectorAll('.compare-month:checked'))
                 .map(cb => cb.value);
             
@@ -1885,13 +2194,25 @@
                 return;
             }
             
-            const comparisonData = selectedMonths.flatMap(month => monthlyData[month] || []);
-            if (comparisonData.length === 0) {
-                alert('لا توجد بيانات للمقارنة');
+            await generateComparisonTablePDF(selectedMonths);
+        }
+
+        async function downloadRestaurantComparisonPDF() {
+            const selectedManager = managerSelect.value;
+            if (!selectedManager) {
+                alert('يرجى اختيار مدير التشغيل');
                 return;
             }
             
-            await generatePDF(true, 'comparison', comparisonData, selectedMonths);
+            const selectedMonths = Array.from(document.querySelectorAll('.compare-month:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedMonths.length === 0) {
+                alert('يرجى اختيار الأشهر للمقارنة أولاً');
+                return;
+            }
+            
+            await generateRestaurantComparisonPDF(selectedManager, selectedMonths);
         }
 
         async function generatePDF(isDetailed = false, type = 'report', customData = null, selectedMonths = null) {
@@ -2072,6 +2393,724 @@
             }
         }
 
+        async function generateDetailedPDF() {
+            if (!window.jspdf) {
+                alert('مكتبة PDF غير محملة. يرجى التحقق من الاتصال بالإنترنت.');
+                return;
+            }
+            
+            const dataToExport = filteredData.length > 0 ? filteredData : 
+                (currentMonth === 'الكل' ? allData : (monthlyData[currentMonth] || []));
+            
+            if (dataToExport.length === 0) {
+                alert('لا توجد بيانات لحفظها كـ PDF');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const pdfTemplate = document.getElementById('pdf-detailed-template');
+                
+                // تحديث المعلومات في قالب PDF
+                document.getElementById('pdf-detailed-report-type').textContent = 'تقرير مفصل';
+                document.getElementById('pdf-detailed-period').textContent = currentMonth === 'الكل' ? 'جميع الأشهر' : 'شهر ' + currentMonth;
+                document.getElementById('pdf-detailed-total-records').textContent = dataToExport.length;
+                document.getElementById('pdf-detailed-print-date').textContent = new Date().toLocaleDateString('ar-SA');
+                
+                // تحديث الملخص
+                const stats = calculateMonthStats(dataToExport);
+                document.getElementById('pdf-detailed-summary').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                        <div>عدد الموزعين: <strong>${stats.totalEmployees}</strong></div>
+                        <div>إجمالي أيام العمل: <strong>${stats.totalDays}</strong></div>
+                        <div>إجمالي الساعات: <strong>${stats.totalHours}</strong></div>
+                        <div>إجمالي الرواتب: <strong>${stats.totalSalary.toFixed(3)} د.ك</strong></div>
+                        <div>عدد المطاعم: <strong>${stats.uniqueRestaurants}</strong></div>
+                        <div>عدد الشركات: <strong>${stats.uniqueCompanies}</strong></div>
+                    </div>
+                `;
+                
+                // تحديث جدول البيانات
+                const pdfTableBody = document.getElementById('pdf-detailed-table-body');
+                pdfTableBody.innerHTML = '';
+                
+                // إضافة البيانات إلى الجدول (35 صف لكل صفحة) مع الألوان
+                const rowsPerPage = 35;
+                const totalPages = Math.ceil(dataToExport.length / rowsPerPage);
+                
+                for (let page = 0; page < totalPages; page++) {
+                    const startIndex = page * rowsPerPage;
+                    const endIndex = Math.min(startIndex + rowsPerPage, dataToExport.length);
+                    const pageData = dataToExport.slice(startIndex, endIndex);
+                    
+                    if (page > 0) {
+                        // إضافة فاصل بين الصفحات
+                        const pageSeparator = document.createElement('div');
+                        pageSeparator.style.height = '50px';
+                        pageSeparator.style.borderTop = '2px dashed #ddd';
+                        pageSeparator.style.marginTop = '20px';
+                        pageSeparator.style.paddingTop = '10px';
+                        pageSeparator.innerHTML = `<div style="text-align: center; color: #666; font-size: 10px;">الصفحة ${page + 1} من ${totalPages}</div>`;
+                        pdfTableBody.parentNode.insertBefore(pageSeparator, pdfTableBody);
+                    }
+                    
+                    pageData.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        const rowNum = startIndex + index + 1;
+                        
+                        // تحديد لون الخلفية للصفوف الزوجية
+                        const rowBgColor = rowNum % 2 === 0 ? '#f8f9fa' : '#ffffff';
+                        
+                        // تحديد لون وخلفية نوع المركبة
+                        let vehicleCell = item.نوع_المركبة || 'سيارة';
+                        if (item.نوع_المركبة === 'سيكل') {
+                            vehicleCell = `<span style="background: #e8f5e9; padding: 2px 6px; border-radius: 3px;">🚲 سيكل</span>`;
+                        } else {
+                            vehicleCell = `<span style="background: #fff3e0; padding: 2px 6px; border-radius: 3px;">🚗 سيارة</span>`;
+                        }
+                        
+                        row.innerHTML = `
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};">${rowNum}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};"><strong>${item.اسم || ''}</strong></td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};">${item.mطعم || ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor}; color: #1976d2; font-weight: bold;">${item.ايام > 0 ? item.ايام : ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor}; color: #388e3c; font-weight: bold;">${item.ساعات > 0 ? item.ساعات : ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor}; color: #d32f2f; font-weight: bold;">${item.راتب > 0 ? item.راتب.toFixed(3) : ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};"><span style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px;">${item.شركة || ''}</span></td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};">${vehicleCell}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center; background: ${rowBgColor};">${item.شهر || ''}</td>
+                        `;
+                        pdfTableBody.appendChild(row);
+                    });
+                }
+                
+                // تحديث الإجماليات
+                document.getElementById('pdf-detailed-totals').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                        <div>المجموع: <strong>${dataToExport.length} سجل</strong></div>
+                        <div>إجمالي أيام العمل: <strong>${stats.totalDays} يوم</strong></div>
+                        <div>إجمالي الساعات: <strong>${stats.totalHours} ساعة</strong></div>
+                        <div>إجمالي الرواتب: <strong>${stats.totalSalary.toFixed(3)} د.ك</strong></div>
+                        <div>متوسط الراتب: <strong>${stats.avgSalary.toFixed(3)} د.ك</strong></div>
+                    </div>
+                `;
+                
+                // إضافة التوقيع
+                document.getElementById('pdf-detailed-signature').innerHTML = `
+                    <div style="color: #d32f2f; font-size: 9px; text-align: left;">
+                        Yasser Elkhateeb - مطور البرنامج 67011143
+                    </div>
+                `;
+                
+                // عرض قالب PDF مؤقتاً لالتقاط الصورة
+                const originalDisplay = pdfTemplate.style.display;
+                const originalPosition = pdfTemplate.style.position;
+                const originalLeft = pdfTemplate.style.left;
+                const originalTop = pdfTemplate.style.top;
+                const originalZIndex = pdfTemplate.style.zIndex;
+                
+                pdfTemplate.style.display = 'block';
+                pdfTemplate.style.position = 'fixed';
+                pdfTemplate.style.left = '0';
+                pdfTemplate.style.top = '0';
+                pdfTemplate.style.zIndex = '10000';
+                pdfTemplate.style.background = 'white';
+                pdfTemplate.style.overflow = 'visible';
+                
+                // استخدام html2canvas لالتقاط الصورة بنفس الإعدادات الأصلية
+                const canvas = await html2canvas(pdfTemplate, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#FFFFFF',
+                    width: 794,
+                    height: pdfTemplate.scrollHeight,
+                    windowWidth: 794,
+                    windowHeight: pdfTemplate.scrollHeight
+                });
+                
+                // إعادة العنصر إلى وضعه الأصلي
+                pdfTemplate.style.display = originalDisplay;
+                pdfTemplate.style.position = originalPosition;
+                pdfTemplate.style.left = originalLeft;
+                pdfTemplate.style.top = originalTop;
+                pdfTemplate.style.zIndex = originalZIndex;
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const pdf = new window.jspdf.jsPDF('p', 'pt', 'a4');
+                
+                const imgWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // حساب عدد الصفحات المطلوبة
+                const totalPDFPages = Math.ceil(imgHeight / pageHeight);
+                
+                // إضافة الصورة الأولى
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // إضافة الصفحات الإضافية إذا لزم الأمر
+                for (let i = 1; i < totalPDFPages; i++) {
+                    position = -i * pageHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                }
+                
+                const fileName = `تقرير_مفصل_${currentMonth === 'الكل' ? 'جميع_الاشهر' : currentMonth}.pdf`;
+                pdf.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating detailed PDF:', error);
+                alert('حدث خطأ أثناء إنشاء ملف PDF: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function generateComparisonTablePDF(selectedMonths) {
+            if (!window.jspdf) {
+                alert('مكتبة PDF غير محملة. يرجى التحقق من الاتصال بالإنترنت.');
+                return;
+            }
+            
+            if (selectedMonths.length === 0) {
+                alert('يرجى اختيار الأشهر للمقارنة أولاً');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // إنشاء عنصر مؤقت لعرض جدول المقارنة
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-10000px';
+                tempDiv.style.top = '-10000px';
+                tempDiv.style.width = '794px';
+                tempDiv.style.background = 'white';
+                tempDiv.style.padding = '20px';
+                tempDiv.style.boxSizing = 'border-box';
+                tempDiv.style.direction = 'rtl';
+                tempDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+                tempDiv.style.fontSize = '12px';
+                
+                // تجميع البيانات حسب مدير التشغيل لكل شهر (بالرواتب)
+                const managerStats = {};
+                const allManagers = new Set();
+                
+                selectedMonths.forEach(month => {
+                    const data = monthlyData[month] || [];
+                    managerStats[month] = {};
+                    
+                    // تجميع البيانات حسب مدير التشغيل (بالرواتب)
+                    data.forEach(item => {
+                        const manager = item.مدير_التشغيل || 'غير معروف';
+                        allManagers.add(manager);
+                        
+                        if (!managerStats[month][manager]) {
+                            managerStats[month][manager] = {
+                                carSalary: 0,
+                                bikeSalary: 0,
+                                totalSalary: 0,
+                                employees: 0
+                            };
+                        }
+                        
+                        if (item.نوع_المركبة === 'سيارة') {
+                            managerStats[month][manager].carSalary += item.راتب || 0;
+                        } else if (item.نوع_المركبة === 'سيكل') {
+                            managerStats[month][manager].bikeSalary += item.راتب || 0;
+                        }
+                        
+                        managerStats[month][manager].totalSalary += item.راتب || 0;
+                        managerStats[month][manager].employees++;
+                    });
+                });
+                
+                // إنشاء محتوى جدول المقارنة
+                let html = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شعار الشركة" 
+                             style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #4a90e2; margin-bottom: 5px; margin: 0 auto 5px; display: block;">
+                        <h2 style="color: #4a90e2; margin: 0; font-size: 18px;">شركة نايف للأغذية</h2>
+                        <h3 style="color: #4a90e2; margin: 0 0 8px 0; font-size: 16px;">جدول مقارنة الرواتب للأشهر</h3>
+                        <div style="margin-bottom: 8px; text-align: center;">
+                            <div style="font-size: 14px; font-weight: bold; display: inline-block;">
+                                الفترة: ${selectedMonths.length === 1 ? `شهر ${selectedMonths[0]}` : `من ${selectedMonths[0]} حتى ${selectedMonths[selectedMonths.length - 1]}`}
+                            </div>
+                            <div style="display: inline-block; width: 1cm;"></div>
+                            <div style="font-size: 12px; display: inline-block;">
+                                عدد الأشهر: ${selectedMonths.length}
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px;">
+                            <div>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</div>
+                            <div>إجمالي الأشهر: ${selectedMonths.length}</div>
+                        </div>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="padding: 8px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #424242 0%, #212121 100%); color: white;">الشهر</th>
+                                <th colspan="3" style="padding: 8px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white;">طارق بيومي</th>
+                                <th colspan="3" style="padding: 8px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white;">هاني عبدالله</th>
+                                <th colspan="3" style="padding: 8px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white;">محمد مرتضى</th>
+                                <th colspan="4" style="padding: 8px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">الإجمالي للشهر</th>
+                            </tr>
+                            <tr>
+                                <!-- أعمدة طارق بيومي -->
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيارات</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيكل</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">إجمالي الرواتب</th>
+                                <!-- أعمدة هاني عبدالله -->
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيارات</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيكل</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">إجمالي الرواتب</th>
+                                <!-- أعمدة محمد مرتضى -->
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيارات</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">رواتب سيكل</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8eaf6;">إجمالي الرواتب</th>
+                                <!-- أعمدة الإجمالي -->
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #fff3e0;">إجمالي سيارات</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e8f5e9;">إجمالي سيكل</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #ffcc80;">إجمالي الرواتب</th>
+                                <th style="padding: 6px; border: 1px solid #000; text-align: center; background: #e3f2fd;">عدد الموزعين</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // إضافة بيانات كل شهر
+                selectedMonths.forEach(month => {
+                    const monthData = monthlyData[month] || [];
+                    const tarekStats = managerStats[month]['طارق بيومي'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                    const haniStats = managerStats[month]['هاني عبدالله'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                    const murtadaStats = managerStats[month]['محمد مرتضى'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                    
+                    // حساب الإجماليات للشهر
+                    const totalCarSalary = tarekStats.carSalary + haniStats.carSalary + murtadaStats.carSalary;
+                    const totalBikeSalary = tarekStats.bikeSalary + haniStats.bikeSalary + murtadaStats.bikeSalary;
+                    const totalAllSalary = totalCarSalary + totalBikeSalary;
+                    const totalEmployees = tarekStats.employees + haniStats.employees + murtadaStats.employees;
+                    
+                    const rowBgColor = selectedMonths.indexOf(month) % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                    
+                    html += `
+                        <tr style="background: ${rowBgColor};">
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${month}</td>
+                            <!-- بيانات طارق بيومي -->
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${tarekStats.carSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${tarekStats.bikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${tarekStats.totalSalary.toFixed(3)}</td>
+                            <!-- بيانات هاني عبدالله -->
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${haniStats.carSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${haniStats.bikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${haniStats.totalSalary.toFixed(3)}</td>
+                            <!-- بيانات محمد مرتضى -->
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${murtadaStats.carSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${murtadaStats.bikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${murtadaStats.totalSalary.toFixed(3)}</td>
+                            <!-- الإجماليات -->
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${totalCarSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${totalBikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${totalAllSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${totalEmployees}</td>
+                        </tr>
+                    `;
+                });
+                
+                // إضافة صف المجموع
+                if (selectedMonths.length > 1) {
+                    let totalTarekCarSalary = 0, totalTarekBikeSalary = 0, totalTarekSalary = 0, totalTarekEmployees = 0;
+                    let totalHaniCarSalary = 0, totalHaniBikeSalary = 0, totalHaniSalary = 0, totalHaniEmployees = 0;
+                    let totalMurtadaCarSalary = 0, totalMurtadaBikeSalary = 0, totalMurtadaSalary = 0, totalMurtadaEmployees = 0;
+                    let grandTotalCarSalary = 0, grandTotalBikeSalary = 0, grandTotalSalary = 0, grandTotalEmployees = 0;
+                    
+                    selectedMonths.forEach(month => {
+                        const tarekStats = managerStats[month]['طارق بيومي'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                        const haniStats = managerStats[month]['هاني عبدالله'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                        const murtadaStats = managerStats[month]['محمد مرتضى'] || { carSalary: 0, bikeSalary: 0, totalSalary: 0, employees: 0 };
+                        
+                        totalTarekCarSalary += tarekStats.carSalary;
+                        totalTarekBikeSalary += tarekStats.bikeSalary;
+                        totalTarekSalary += tarekStats.totalSalary;
+                        totalTarekEmployees += tarekStats.employees;
+                        
+                        totalHaniCarSalary += haniStats.carSalary;
+                        totalHaniBikeSalary += haniStats.bikeSalary;
+                        totalHaniSalary += haniStats.totalSalary;
+                        totalHaniEmployees += haniStats.employees;
+                        
+                        totalMurtadaCarSalary += murtadaStats.carSalary;
+                        totalMurtadaBikeSalary += murtadaStats.bikeSalary;
+                        totalMurtadaSalary += murtadaStats.totalSalary;
+                        totalMurtadaEmployees += murtadaStats.employees;
+                    });
+                    
+                    grandTotalCarSalary = totalTarekCarSalary + totalHaniCarSalary + totalMurtadaCarSalary;
+                    grandTotalBikeSalary = totalTarekBikeSalary + totalHaniBikeSalary + totalMurtadaBikeSalary;
+                    grandTotalSalary = totalTarekSalary + totalHaniSalary + totalMurtadaSalary;
+                    grandTotalEmployees = totalTarekEmployees + totalHaniEmployees + totalMurtadaEmployees;
+                    
+                    html += `
+                        <tr style="background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%); font-weight: bold;">
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">المجموع</td>
+                            <!-- مجاميع طارق بيومي -->
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalTarekCarSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalTarekBikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalTarekSalary.toFixed(3)}</td>
+                            <!-- مجاميع هاني عبدالله -->
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalHaniCarSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalHaniBikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalHaniSalary.toFixed(3)}</td>
+                            <!-- مجاميع محمد مرتضى -->
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalMurtadaCarSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalMurtadaBikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${totalMurtadaSalary.toFixed(3)}</td>
+                            <!-- المجاميع الكلية -->
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${grandTotalCarSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${grandTotalBikeSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${grandTotalSalary.toFixed(3)}</td>
+                            <td style="padding: 6px; border: 1px solid #000; text-align: center;">${grandTotalEmployees}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += `</tbody></table>`;
+                
+                // إضافة التوقيع
+                html += `
+                    <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left; font-size: 8px; color: #d32f2f;">
+                        Yasser Elkhateeb - مطور البرنامج 67011143
+                    </div>
+                `;
+                
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+                
+                // استخدام html2canvas لالتقاط الصورة
+                const canvas = await html2canvas(tempDiv, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#FFFFFF',
+                    width: 794,
+                    height: tempDiv.scrollHeight,
+                    windowWidth: 794,
+                    windowHeight: tempDiv.scrollHeight
+                });
+                
+                // إزالة العنصر المؤقت
+                document.body.removeChild(tempDiv);
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const pdf = new window.jspdf.jsPDF('p', 'pt', 'a4');
+                
+                const imgWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // حساب عدد الصفحات المطلوبة
+                const totalPDFPages = Math.ceil(imgHeight / pageHeight);
+                
+                // إضافة الصورة الأولى
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // إضافة الصفحات الإضافية إذا لزم الأمر
+                for (let i = 1; i < totalPDFPages; i++) {
+                    position = -i * pageHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                }
+                
+                const fileName = `جدول_مقارنة_الرواتب_${selectedMonths.length}_شهر.pdf`;
+                pdf.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating comparison table PDF:', error);
+                alert('حدث خطأ أثناء إنشاء ملف PDF: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function generateRestaurantComparisonPDF(selectedManager, selectedMonths) {
+            if (!window.jspdf) {
+                alert('مكتبة PDF غير محملة. يرجى التحقق من الاتصال بالإنترنت.');
+                return;
+            }
+            
+            if (!selectedManager || selectedMonths.length === 0) {
+                alert('يرجى اختيار مدير التشغيل والأشهر للمقارنة');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // إنشاء عنصر مؤقت لعرض جدول مقارنة المطاعم
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-10000px';
+                tempDiv.style.top = '-10000px';
+                tempDiv.style.width = '794px';
+                tempDiv.style.background = 'white';
+                tempDiv.style.padding = '20px';
+                tempDiv.style.boxSizing = 'border-box';
+                tempDiv.style.direction = 'rtl';
+                tempDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+                tempDiv.style.fontSize = '12px';
+                
+                // تجميع بيانات المطاعم للشهور المحددة
+                const restaurantStats = {};
+                const allRestaurants = new Set();
+                
+                selectedMonths.forEach(month => {
+                    const data = monthlyData[month] || [];
+                    restaurantStats[month] = {};
+                    
+                    // تصفية البيانات حسب مدير التشغيل المحدد
+                    const managerData = data.filter(item => item.مدير_التشغيل === selectedManager);
+                    
+                    // تجميع بيانات المطاعم
+                    managerData.forEach(item => {
+                        const restaurant = item.mطعم || 'غير معروف';
+                        allRestaurants.add(restaurant);
+                        
+                        if (!restaurantStats[month][restaurant]) {
+                            restaurantStats[month][restaurant] = {
+                                carSalary: 0,
+                                bikeSalary: 0,
+                                totalSalary: 0,
+                                employees: 0
+                            };
+                        }
+                        
+                        if (item.نوع_المركبة === 'سيارة') {
+                            restaurantStats[month][restaurant].carSalary += item.راتب || 0;
+                        } else if (item.نوع_المركبة === 'سيكل') {
+                            restaurantStats[month][restaurant].bikeSalary += item.راتب || 0;
+                        }
+                        
+                        restaurantStats[month][restaurant].totalSalary += item.راتب || 0;
+                        restaurantStats[month][restaurant].employees++;
+                    });
+                });
+                
+                // تحديد الفترة
+                const startMonth = selectedMonths[0];
+                const endMonth = selectedMonths[selectedMonths.length - 1];
+                const periodText = selectedMonths.length === 1 ? `لشهر ${startMonth}` : `من ${startMonth} حتى ${endMonth}`;
+                
+                // إنشاء محتوى جدول مقارنة المطاعم
+                let html = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شعار الشركة" 
+                             style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #4a90e2; margin-bottom: 5px; margin: 0 auto 5px; display: block;">
+                        <h2 style="color: #4a90e2; margin: 0; font-size: 18px;">شركة نايف للأغذية</h2>
+                        <h3 style="color: #4a90e2; margin: 0 0 8px 0; font-size: 16px;">إجمالي رواتب الموزعين الخارجيين لمطاعم الأستاذ/ ${selectedManager}</h3>
+                        <div style="margin-bottom: 8px; text-align: center;">
+                            <div style="font-size: 14px; font-weight: bold; display: inline-block;">
+                                الفترة: ${periodText}
+                            </div>
+                            <div style="display: inline-block; width: 1cm;"></div>
+                            <div style="font-size: 12px; display: inline-block;">
+                                عدد الأشهر: ${selectedMonths.length}
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px;">
+                            <div>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</div>
+                            <div>عدد المطاعم: ${Array.from(allRestaurants).filter(r => r && r !== 'غير معروف').length}</div>
+                        </div>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="padding: 6px; border: 1px solid #000; text-align: right; background: #f0f0f0; font-weight: bold;">اسم المطعم</th>
+                `;
+                
+                // إضافة أعمدة الأشهر
+                selectedMonths.forEach(month => {
+                    html += `<th colspan="2" style="padding: 6px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%); color: white;">${month}</th>`;
+                });
+                
+                html += `
+                                <th colspan="3" style="padding: 6px; border: 1px solid #000; text-align: center; background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%); color: white;">إجمالي السنة</th>
+                            </tr>
+                            <tr>
+                `;
+                
+                // إضافة أعمدة التفاصيل لكل شهر
+                selectedMonths.forEach(() => {
+                    html += `
+                        <th style="padding: 5px; border: 1px solid #000; text-align: center; background: #fff3e0; font-weight: bold;">رواتب سيارات</th>
+                        <th style="padding: 5px; border: 1px solid #000; text-align: center; background: #e8f5e9; font-weight: bold;">رواتب سيكل</th>
+                    `;
+                });
+                
+                html += `
+                        <th style="padding: 5px; border: 1px solid #000; text-align: center; background: #fff3e0; font-weight: bold;">إجمالي سيارات</th>
+                        <th style="padding: 5px; border: 1px solid #000; text-align: center; background: #e8f5e9; font-weight: bold;">إجمالي سيكل</th>
+                        <th style="padding: 5px; border: 1px solid #000; text-align: center; background: #f3e5f5; font-weight: bold;">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                `;
+                
+                // حساب الإجماليات الشهرية
+                const monthlyTotals = {};
+                selectedMonths.forEach(month => {
+                    monthlyTotals[month] = {
+                        carSalary: 0,
+                        bikeSalary: 0,
+                        totalSalary: 0
+                    };
+                });
+                
+                // إضافة بيانات المطاعم
+                const restaurantArray = Array.from(allRestaurants).filter(r => r && r !== 'غير معروف');
+                restaurantArray.forEach((restaurant, index) => {
+                    const rowBgColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                    html += `<tr style="background: ${rowBgColor};">`;
+                    html += `<td style="padding: 5px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${restaurant}</td>`;
+                    
+                    // حساب إجماليات السنة للمطعم
+                    let restaurantYearCarSalary = 0;
+                    let restaurantYearBikeSalary = 0;
+                    let restaurantYearTotalSalary = 0;
+                    
+                    // إضافة بيانات كل شهر
+                    selectedMonths.forEach(month => {
+                        const stats = restaurantStats[month][restaurant] || { carSalary: 0, bikeSalary: 0, totalSalary: 0 };
+                        
+                        html += `
+                            <td style="padding: 5px; border: 1px solid #ddd; text-align: center;">${stats.carSalary.toFixed(3)}</td>
+                            <td style="padding: 5px; border: 1px solid #ddd; text-align: center;">${stats.bikeSalary.toFixed(3)}</td>
+                        `;
+                        
+                        // تحديث الإجماليات الشهرية
+                        monthlyTotals[month].carSalary += stats.carSalary;
+                        monthlyTotals[month].bikeSalary += stats.bikeSalary;
+                        monthlyTotals[month].totalSalary += stats.totalSalary;
+                        
+                        // تحديث إجماليات السنة للمطعم
+                        restaurantYearCarSalary += stats.carSalary;
+                        restaurantYearBikeSalary += stats.bikeSalary;
+                        restaurantYearTotalSalary += stats.totalSalary;
+                    });
+                    
+                    // إضافة إجماليات السنة للمطعم
+                    html += `
+                        <td style="padding: 5px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${restaurantYearCarSalary.toFixed(3)}</td>
+                        <td style="padding: 5px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${restaurantYearBikeSalary.toFixed(3)}</td>
+                        <td style="padding: 5px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${restaurantYearTotalSalary.toFixed(3)}</td>
+                    `;
+                    
+                    html += `</tr>`;
+                });
+                
+                // إضافة صف الإجماليات الشهرية
+                html += `<tr style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; font-weight: bold;">`;
+                html += `<td style="padding: 5px; border: 1px solid #000; text-align: right;"><strong>إجمالي الشهر</strong></td>`;
+                
+                selectedMonths.forEach(month => {
+                    const totals = monthlyTotals[month];
+                    html += `
+                        <td style="padding: 5px; border: 1px solid #000; text-align: center;"><strong>${totals.carSalary.toFixed(3)}</strong></td>
+                        <td style="padding: 5px; border: 1px solid #000; text-align: center;"><strong>${totals.bikeSalary.toFixed(3)}</strong></td>
+                    `;
+                });
+                
+                // حساب إجماليات السنة الكلية
+                let yearTotalCarSalary = 0;
+                let yearTotalBikeSalary = 0;
+                let yearTotalAllSalary = 0;
+                
+                selectedMonths.forEach(month => {
+                    const totals = monthlyTotals[month];
+                    yearTotalCarSalary += totals.carSalary;
+                    yearTotalBikeSalary += totals.bikeSalary;
+                    yearTotalAllSalary += totals.totalSalary;
+                });
+                
+                html += `
+                    <td style="padding: 5px; border: 1px solid #000; text-align: center;"><strong>${yearTotalCarSalary.toFixed(3)}</strong></td>
+                    <td style="padding: 5px; border: 1px solid #000; text-align: center;"><strong>${yearTotalBikeSalary.toFixed(3)}</strong></td>
+                    <td style="padding: 5px; border: 1px solid #000; text-align: center;"><strong>${yearTotalAllSalary.toFixed(3)}</strong></td>
+                `;
+                
+                html += `</tr>`;
+                
+                html += `</tbody></table>`;
+                
+                // إضافة التوقيع
+                html += `
+                    <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left; font-size: 8px; color: #d32f2f;">
+                        Yasser Elkhateeb - مطور البرنامج 67011143
+                    </div>
+                `;
+                
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+                
+                // استخدام html2canvas لالتقاط الصورة
+                const canvas = await html2canvas(tempDiv, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#FFFFFF',
+                    width: 794,
+                    height: tempDiv.scrollHeight,
+                    windowWidth: 794,
+                    windowHeight: tempDiv.scrollHeight
+                });
+                
+                // إزالة العنصر المؤقت
+                document.body.removeChild(tempDiv);
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const pdf = new window.jspdf.jsPDF('p', 'pt', 'a4');
+                
+                const imgWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // حساب عدد الصفحات المطلوبة
+                const totalPDFPages = Math.ceil(imgHeight / pageHeight);
+                
+                // إضافة الصورة الأولى
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // إضافة الصفحات الإضافية إذا لزم الأمر
+                for (let i = 1; i < totalPDFPages; i++) {
+                    position = -i * pageHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                }
+                
+                const fileName = `جدول_مطاعم_${selectedManager}_${selectedMonths.length}_شهر.pdf`;
+                pdf.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating restaurant comparison PDF:', error);
+                alert('حدث خطأ أثناء إنشاء ملف PDF: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
         function resetView() {
             document.getElementById('searchCompany').value = '';
             document.getElementById('searchDistributor').value = '';
@@ -2083,6 +3122,7 @@
             filteredData = [];
             showReport(currentMonth);
             switchTab('report');
+            managerSelector.style.display = 'none';
         }
 
         function showLoading() {
